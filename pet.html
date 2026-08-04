@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galeria do Pet — Um Dia do Cão</title>
+<link rel="icon" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#112544;
+    --ink-soft:#4a5a72;
+    --paper:#fff6f3;
+    --paper-alt:#fbede7;
+    --coral:#ff5b59;
+    --coral-dark:#e8433f;
+    --amber:#f2a93c;
+    --mist:#e7ddd3;
+    --radius-lg:28px;
+    --radius-md:18px;
+    --radius-sm:10px;
+    --maxw:1180px;
+    --display:'Bricolage Grotesque', system-ui, sans-serif;
+    --body:'DM Sans', system-ui, sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:var(--body);
+    background: linear-gradient(180deg, #fff8f5 0%, #f9ece6 40%, #f2dfd8 80%, #fff6f3 100%);
+    background-attachment: fixed;
+    color:var(--ink);
+    line-height:1.5;
+  }
+  img{max-width:100%;display:block;}
+  a{color:inherit;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px;}
+  h1,h2,h3{font-family:var(--display);margin:0;line-height:1.05;}
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family:var(--body);
+    font-weight:700;
+    font-size:15px;
+    padding:14px 24px;
+    border-radius:100px;
+    text-decoration:none;
+    border:2px solid transparent;
+    cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .btn:focus-visible{outline:3px solid var(--amber);outline-offset:3px;}
+  .btn-primary{background:var(--coral);color:var(--paper);box-shadow:0 6px 0 var(--coral-dark);}
+  .btn-primary:hover{transform:translateY(-2px);}
+  .btn-ghost{background:transparent;border-color:var(--ink);color:var(--ink);}
+  .btn-ghost:hover{background:var(--ink);color:var(--paper);}
+
+  /* ---------- NAV ---------- */
+  .nav{
+    position:sticky;top:0;z-index:100;
+    background:#ff5b59;
+    color:#ffffff;
+    box-shadow:0 4px 15px rgba(232,67,63,.2);
+  }
+  .nav .wrap{display:flex;align-items:center;justify-content:space-between;padding-top:14px;padding-bottom:14px;}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#ffffff;}
+  .brand img{width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid #ffffff;}
+  .brand span{font-family:var(--display);font-weight:700;font-size:19px;color:#ffffff;}
+  .nav-links{display:flex;align-items:center;gap:24px;list-style:none;margin:0;padding:0;}
+  .nav-links a{text-decoration:none;font-weight:600;font-size:15px;color:#ffffff;transition:opacity .15s;}
+  .nav-links a:hover{opacity:.8;}
+  .nav-cta .btn-ghost{background:transparent;border-color:#ffffff;color:#ffffff;}
+  .nav-cta .btn-ghost:hover{background:#ffffff;color:#ff5b59;}
+
+  /* ---------- PET PAGE ---------- */
+  .pet-page{padding:50px 0 90px;}
+  .back-link{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    text-decoration:none;
+    font-weight:700;
+    font-size:15px;
+    color:var(--coral-dark);
+    margin-bottom:28px;
+    transition:transform .15s;
+  }
+  .back-link:hover{transform:translateX(-4px);}
+
+  .pet-header{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:20px;
+    margin-bottom:36px;
+    padding-bottom:20px;
+    border-bottom:1px solid var(--mist);
+  }
+  .pet-title h1{
+    font-size:clamp(32px,5vw,52px);
+    color:var(--ink);
+  }
+  .pet-title .subtitle{
+    font-size:18px;
+    color:var(--ink-soft);
+    margin-top:8px;
+    font-weight:500;
+  }
+
+  /* SPOTLIGHT PHOTO & BIO GRID */
+  .pet-main-grid{
+    display:grid;
+    grid-template-columns:1.2fr 0.8fr;
+    gap:42px;
+    align-items:start;
+    margin-bottom:60px;
+  }
+
+  .spotlight-box{
+    position:relative;
+    width:100%;
+    aspect-ratio:4/3;
+    border-radius:var(--radius-lg);
+    overflow:hidden;
+    background:var(--paper-alt);
+    border:1px solid var(--mist);
+    box-shadow:0 18px 40px -12px rgba(17,37,68,.2);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .spotlight-img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+  .spotlight-badge{
+    position:absolute;
+    top:18px;
+    left:18px;
+    background:rgba(17,37,68,.85);
+    color:#fff;
+    padding:6px 14px;
+    border-radius:100px;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    backdrop-filter:blur(4px);
+  }
+
+  /* BIO CARD */
+  .bio-card{
+    background:#fff;
+    border-radius:var(--radius-lg);
+    padding:34px;
+    border:1px solid var(--mist);
+    box-shadow:0 12px 30px -10px rgba(17,37,68,.08);
+  }
+  .bio-card h2{
+    font-size:24px;
+    margin-bottom:16px;
+    color:var(--ink);
+  }
+  .bio-card p{
+    font-size:16px;
+    color:var(--ink-soft);
+    line-height:1.75;
+    margin:0 0 16px;
+  }
+  .bio-meta{
+    margin-top:24px;
+    padding-top:20px;
+    border-top:1px dashed var(--mist);
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    font-size:14px;
+  }
+  .bio-meta-item strong{
+    display:block;
+    color:var(--ink);
+    font-weight:700;
+  }
+  .bio-meta-item span{
+    color:var(--ink-soft);
+  }
+
+  /* THUMBNAILS SECTION */
+  .gallery-section h2{
+    font-size:28px;
+    margin-bottom:20px;
+  }
+  /* THUMBNAILS SECTION - wraps to as many rows as needed, any number of photos.
+     (CSS multi-column "masonry" was tried first but fills top-to-bottom per column,
+     which silently reorders the photographer's sequence and can leave trailing
+     columns empty when there are only a few photos — a plain wrapping grid avoids
+     both, and per-photo focus below keeps crops intentional instead of always-center.) */
+  .thumbs-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
+    gap:20px;
+  }
+  .gallery-empty{
+    color:var(--ink-soft);
+    padding:40px 0;
+    text-align:center;
+  }
+
+  /* RELATED CONTENT SECTION */
+  .related-section{
+    margin-top:70px;
+    padding-top:50px;
+    border-top:1px solid var(--mist);
+  }
+  .related-section h2{
+    font-size:28px;
+    margin-bottom:28px;
+    color:var(--ink);
+  }
+  .related-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:24px;
+  }
+  @media (max-width:880px){
+    .related-grid{grid-template-columns:1fr;}
+  }
+  .related-card{
+    background:#ffffff;
+    border-radius:var(--radius-md);
+    overflow:hidden;
+    border:1px solid var(--mist);
+    box-shadow:0 8px 24px -8px rgba(17,37,68,.08);
+    text-decoration:none;
+    color:inherit;
+    display:flex;
+    flex-direction:column;
+    transition:transform .2s ease, box-shadow .2s ease;
+  }
+  .related-card:hover{
+    transform:translateY(-5px);
+    box-shadow:0 16px 32px -10px rgba(17,37,68,.18);
+  }
+  .related-img{
+    height:180px;
+    width:100%;
+    object-fit:cover;
+    background:var(--paper-alt);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+  .related-img img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+  .related-body{
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    flex-grow:1;
+  }
+  .related-tag{
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--coral-dark);
+    margin-bottom:8px;
+  }
+  .related-card h3{
+    font-size:18px;
+    line-height:1.3;
+    color:var(--ink);
+    margin-bottom:10px;
+  }
+  .related-card p{
+    font-size:14px;
+    color:var(--ink-soft);
+    line-height:1.5;
+    margin:0;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .thumb-card{
+    position:relative;
+    aspect-ratio:1/1;
+    border-radius:var(--radius-md);
+    overflow:hidden;
+    cursor:pointer;
+    border:2px solid transparent;
+    background:var(--paper-alt);
+    transition:transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+  }
+  .thumb-card:hover{
+    transform:scale(1.03);
+    border-color:var(--coral);
+    box-shadow:0 10px 20px -5px rgba(17,37,68,.25);
+  }
+  .thumb-card img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+  .thumb-overlay{
+    position:absolute;
+    inset:0;
+    background:rgba(17,37,68,.3);
+    opacity:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    transition:opacity .2s;
+  }
+  .thumb-card:hover .thumb-overlay{
+    opacity:1;
+  }
+
+  /* ---------- CAROUSEL LIGHTBOX ---------- */
+  .carousel-modal{
+    position:fixed;
+    inset:0;
+    z-index:2000;
+    background:rgba(11,21,38,.94);
+    backdrop-filter:blur(12px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .carousel-modal.active{
+    display:flex;
+  }
+  .carousel-content{
+    position:relative;
+    max-width:1000px;
+    width:100%;
+    max-height:90vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .carousel-stage{
+    width:100%;
+    height:70vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+  }
+  .carousel-img{
+    max-width:100%;
+    max-height:100%;
+    object-fit:contain;
+    border-radius:var(--radius-md);
+    box-shadow:0 20px 50px rgba(0,0,0,.6);
+  }
+  .carousel-caption{
+    color:#fff;
+    margin-top:16px;
+    font-size:16px;
+    text-align:center;
+    font-weight:500;
+  }
+  .carousel-btn{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    background:rgba(255,255,255,.15);
+    color:#fff;
+    border:none;
+    width:50px;
+    height:50px;
+    border-radius:50%;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:background .2s;
+  }
+  .carousel-btn:hover{
+    background:var(--coral);
+  }
+  .carousel-prev{left:-20px;}
+  .carousel-next{right:-20px;}
+  .carousel-close{
+    position:absolute;
+    top:-40px;
+    right:0;
+    background:none;
+    border:none;
+    color:#fff;
+    font-size:32px;
+    cursor:pointer;
+    line-height:1;
+  }
+
+  /* FOOTER */
+  footer{padding:50px 0 36px;border-top:1px solid var(--mist);}
+  footer .wrap{display:flex;flex-wrap:wrap;gap:26px;align-items:center;justify-content:space-between;}
+  .foot-brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);}
+  .foot-brand img{width:34px;height:34px;border-radius:50%;object-fit:cover;}
+  .foot-brand span{font-family:var(--display);font-weight:700;}
+  .foot-links{display:flex;gap:26px;list-style:none;padding:0;margin:0;flex-wrap:wrap;}
+  .foot-links a{text-decoration:none;color:var(--ink-soft);font-size:14px;}
+  .foot-links a:hover{color:var(--coral-dark);}
+  .foot-meta{font-size:13px;color:var(--ink-soft);}
+
+  @media (max-width:880px){
+    .pet-main-grid{grid-template-columns:1fr;}
+    .carousel-prev{left:10px;}
+    .carousel-next{right:10px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class='brand' href='/'>
+      <img src="assets/logo.png" alt="Um Dia do Cão">
+      <span>um dia do cão</span>
+    </a>
+    <nav>
+      <ul class="nav-links">
+        <li><a href='/#portfolio'>Portfólio</a></li>
+        <li><a href='/#como-funciona'>Como funciona</a></li>
+        <li><a href='/#depoimentos'>Depoimentos</a></li>
+        <li><a href='/#sobre'>Sobre</a></li>
+        <li><a href='/#agenda'>Agenda</a></li>
+        <li><a href='/blog'>Blog</a></li>
+        <li><a href='/#contato'>Contato</a></li>
+      </ul>
+    </nav>
+    <div class="nav-cta">
+      <a class='btn btn-ghost' href='/#contato'>Agendar sessão</a>
+    </div>
+  </div>
+</header>
+
+<main class="pet-page">
+  <div class="wrap">
+    <a class='back-link' href='/#portfolio'>← Voltar ao Portfólio</a>
+
+    <div class="pet-header">
+      <div class="pet-title">
+        <h1 id="petName">Carregando…</h1>
+        <div class="subtitle" id="petSubtitle">Fotografia de Pets · São Paulo</div>
+      </div>
+      <a class='btn btn-primary' href='/#contato'>Quero uma sessão assim</a>
+    </div>
+
+    <div class="pet-main-grid">
+      <!-- SPOTLIGHT PHOTO -->
+      <div class="spotlight-box">
+        <span class="spotlight-badge">Foto Destaque</span>
+        <div id="spotlightContainer" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#112544" stroke-width="1.2" width="80" height="80" opacity=".4"><rect x="4" y="7" width="16" height="12" rx="2.5"/><rect x="9" y="4.3" width="6" height="3" rx="1"/><circle cx="12" cy="13" r="3.4"/></svg>
+        </div>
+      </div>
+
+      <!-- PET BIO / STORY -->
+      <div class="bio-card">
+        <h2>Sobre a sessão</h2>
+        <div id="petBio">
+          <p>Cada sessão captura a energia, a curiosidade e os gestos únicos do pet. Trabalhamos no tempo dele, garantindo um ambiente leve e divertido.</p>
+        </div>
+        <div class="bio-meta">
+          <div class="bio-meta-item">
+            <strong>Local</strong>
+            <span id="petLocation">—</span>
+          </div>
+          <div class="bio-meta-item">
+            <strong>Estilo</strong>
+            <span id="petStyle">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- THUMBNAILS SECTION - wrapping grid, any number of photos -->
+    <div class="gallery-section">
+      <h2>Galeria de Fotos</h2>
+      <p style="color:var(--ink-soft);margin-top:-10px;margin-bottom:20px;">Clique em qualquer miniatura para abrir o carrossel em tela cheia.</p>
+      <div class="thumbs-grid" id="thumbsGrid">
+        <!-- Generated dynamically via JS -->
+      </div>
+    </div>
+
+    <!-- CONTEÚDO RELACIONADO SECTION -->
+    <div class="related-section">
+      <h2>Conteúdo relacionado</h2>
+      <div class="related-grid" id="relatedGrid">
+        <p style="color:var(--ink-soft);grid-column:1/-1;">Carregando artigos…</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class='foot-brand' href='/'>
+      <img src="assets/logo.png" alt="Um Dia do Cão">
+      <span>um dia do cão</span>
+    </a>
+    <ul class="foot-links">
+      <li><a href='/#portfolio'>Portfólio</a></li>
+      <li><a href='/#sobre'>Sobre</a></li>
+      <li><a href='/#como-funciona'>Como funciona</a></li>
+      <li><a href='/#depoimentos'>Depoimentos</a></li>
+      <li><a href='/#agenda'>Agenda</a></li>
+      <li><a href='/blog'>Blog</a></li>
+      <li><a href='/#contato'>Contato</a></li>
+    </ul>
+    <div class="foot-meta">© 2026 Um Dia do Cão · São Paulo, Brasil</div>
+  </div>
+</footer>
+
+<!-- CAROUSEL LIGHTBOX MODAL -->
+<div class="carousel-modal" id="carouselModal" aria-hidden="true">
+  <div class="carousel-content">
+    <button class="carousel-close" id="carouselClose" aria-label="Fechar">&times;</button>
+    <div class="carousel-stage">
+      <button class="carousel-btn carousel-prev" id="carouselPrev" aria-label="Anterior">&#10094;</button>
+      <div id="carouselMedia" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"></div>
+      <button class="carousel-btn carousel-next" id="carouselNext" aria-label="Próxima">&#10095;</button>
+    </div>
+    <div class="carousel-caption" id="carouselCaption">Foto 1 de 4</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script>
+  // ===================== CONFIG =====================
+  // Published "pets" tab from Google Sheets (CSV)
+  const PETS_TSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTqd0mxt_Hr2xJGuIiMhe1VhxtxwfuGpDOU4euhMvzrHqUppul47t8WvIG4QvAuU8Scgs0qoO6N3jEx/pub?gid=1061347237&single=true&output=csv";
+
+  // Google Drive "share" links (drive.google.com/file/d/ID/view) aren't directly
+  // loadable as <img src>. This rewrites them into a working direct-image URL.
+  function toDirectImageUrl(url) {
+    if (!url) return '';
+    url = url.trim();
+    if (!url) return '';
+    let m = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+    if (m) return `https://lh3.googleusercontent.com/d/${m[1]}=w1600`;
+    m = url.match(/drive\.google\.com\/open\?id=([^&]+)/);
+    if (m) return `https://lh3.googleusercontent.com/d/${m[1]}=w1600`;
+    return url;
+  }
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const petId = (urlParams.get('id') || '').trim();
+
+  function placeholderIconSVG(size = 70) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" width="${size}" height="${size}" opacity=".4"><rect x="4" y="7" width="16" height="12" rx="2.5"/><rect x="9" y="4.3" width="6" height="3" rx="1"/><circle cx="12" cy="13" r="3.4"/></svg>`;
+  }
+  function zoomIconSVG() {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>`;
+  }
+
+  function renderNotFound() {
+    document.getElementById('petName').innerText = 'Sessão não encontrada';
+    document.getElementById('petSubtitle').innerText = 'Verifique o link ou volte ao portfólio';
+    document.getElementById('petBio').innerHTML = '<p>Não encontramos essa sessão. Volte ao portfólio para ver as sessões disponíveis.</p>';
+    document.getElementById('thumbsGrid').innerHTML = '';
+  }
+
+  // Only lets through safe CSS object-position values (keywords/percentages/px),
+  // since this gets written straight into a style="" attribute — anything else
+  // falls back to "center" instead of being trusted as-is.
+  function sanitizeFocus(value) {
+    if (!value) return 'center';
+    const token = '(left|right|center|top|bottom|\\d{1,3}(?:\\.\\d+)?%|\\d{1,4}px)';
+    const re = new RegExp(`^${token}(\\s+${token})?$`, 'i');
+    const v = value.trim();
+    return re.test(v) ? v : 'center';
+  }
+
+  function escapeAttr(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // Collects every photo defined for a pet: numbered "photoN_url" columns (any N —
+  // not capped at 4, so adding "photo5_url", "photo6_url"... in the sheet is enough
+  // to add more photos), plus an optional "extra_photos_url" column for bulk-adding
+  // many photos as one comma/semicolon/pipe/newline separated list without needing a
+  // new spreadsheet column per photo. Each photo can have a matching focus column
+  // ("photo1_focus", or "extra_photos_focus" aligned by position) — a CSS
+  // object-position value like "top", "center", "30% 70%" — to choose which part of
+  // the photo stays visible when it's cropped in the spotlight box. Defaults to
+  // "center" (today's behavior) when not set.
+  function collectPhotos(pet) {
+    const photos = [];
+
+    Object.keys(pet)
+      .map(k => {
+        const m = k.match(/^photo(\d+)_url$/i);
+        return m ? { n: parseInt(m[1], 10), key: k } : null;
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.n - b.n)
+      .forEach(({ n, key }) => {
+        const url = toDirectImageUrl(pet[key]);
+        if (!url) return;
+        photos.push({ url, focus: sanitizeFocus(pet[`photo${n}_focus`]) });
+      });
+
+    const splitList = (val) => (val || '').split(/[\n,;|]+/).map(s => s.trim()).filter(Boolean);
+    const extraUrls = splitList(pet.extra_photos_url);
+    const extraFocus = splitList(pet.extra_photos_focus);
+    extraUrls.forEach((raw, idx) => {
+      const url = toDirectImageUrl(raw);
+      if (!url) return;
+      photos.push({ url, focus: sanitizeFocus(extraFocus[idx]) });
+    });
+
+    return photos;
+  }
+
+  function renderPet(pet) {
+    document.getElementById('petName').innerText = pet.name || 'Sessão Especial';
+    document.getElementById('petSubtitle').innerText = pet.subtitle || 'Fotografia de Pets · São Paulo';
+    document.getElementById('petBio').innerHTML = `<p>${pet.bio || ''}</p>`;
+    document.getElementById('petLocation').innerText = pet.location || '—';
+    document.getElementById('petStyle').innerText = pet.style || '—';
+    document.title = `${pet.name || 'Sessão'} — Um Dia do Cão`;
+
+    const photos = collectPhotos(pet);
+    window.__petPhotos = photos.map(p => p.url);
+    window.__petName = pet.name || '';
+
+    const petNameAttr = escapeAttr(pet.name || '');
+
+    // Spotlight = first photo, cropped starting from its focus point
+    const spotlightContainer = document.getElementById('spotlightContainer');
+    const first = photos[0];
+    if (first) {
+      spotlightContainer.innerHTML = `<img src="${first.url}" alt="${petNameAttr}" class="spotlight-img" style="object-position:${first.focus};">`;
+    } else {
+      spotlightContainer.innerHTML = `
+        <div style="text-align:center;padding:30px;color:var(--ink);">
+          ${placeholderIconSVG(70)}
+          <div style="font-family:var(--display);font-size:22px;font-weight:700;margin-top:8px;">Foto em breve</div>
+          <div style="font-size:14px;color:var(--ink-soft);margin-top:4px;">${pet.name || ''}</div>
+        </div>`;
+    }
+
+    // Thumbnails — one card per photo, any count, wraps to as many rows as needed.
+    // Each crop starts from that photo's own focus point (its own *_focus column),
+    // not just the spotlight's.
+    const thumbsGrid = document.getElementById('thumbsGrid');
+    if (!photos.length) {
+      thumbsGrid.innerHTML = '<p class="gallery-empty">Fotos dessa sessão em breve.</p>';
+      return;
+    }
+    thumbsGrid.innerHTML = photos.map((photo, idx) => `
+      <div class="thumb-card" onclick="openCarousel(${idx})">
+        <img src="${photo.url}" alt="${petNameAttr} ${idx + 1}" loading="lazy" style="object-position:${photo.focus};">
+        <div class="thumb-overlay">${zoomIconSVG()}</div>
+      </div>`).join('');
+  }
+
+  // ===================== FETCH =====================
+  Papa.parse(PETS_TSV_URL, {
+    download: true,
+    header: true,
+    complete: (results) => {
+      const rows = results.data.filter(r => r.id && r.id.trim());
+      const pet = rows.find(r => r.id.trim().toLowerCase() === petId.toLowerCase());
+      if (!pet) {
+        console.warn('[pet] id não encontrado na planilha:', petId, rows);
+        renderNotFound();
+        return;
+      }
+      renderPet(pet);
+    },
+    error: (err) => {
+      console.error('[pet] erro ao carregar planilha:', err);
+      document.getElementById('petBio').innerHTML =
+        '<p>Não foi possível carregar os dados desta sessão no momento.</p>';
+    }
+  });
+
+  // ===================== RELATED CONTENT (most recent blog posts) =====================
+  const BLOG_TSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTqd0mxt_Hr2xJGuIiMhe1VhxtxwfuGpDOU4euhMvzrHqUppul47t8WvIG4QvAuU8Scgs0qoO6N3jEx/pub?gid=112255760&single=true&output=csv";
+
+  const CATEGORY_GRADIENTS = {
+    dicas:          "linear-gradient(135deg, #fce4d6, #f9cbbb)",
+    bastidores:     "linear-gradient(135deg, #f9e3ba, #f2c788)",
+    locais:         "linear-gradient(135deg, #e4eedb, #b2d5a3)",
+    comportamento:  "linear-gradient(135deg, #f7d8dc, #f1bebc)"
+  };
+  const DEFAULT_GRADIENT = "linear-gradient(135deg, #fbede7, #f4d3c8)";
+  const RELATED_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="#112544" stroke-width="1.5" width="48" height="48" opacity=".7"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`;
+
+  const PT_MONTHS = {
+    janeiro:0, fevereiro:1, março:2, marco:2, abril:3, maio:4, junho:5,
+    julho:6, agosto:7, setembro:8, outubro:9, novembro:10, dezembro:11
+  };
+  // Parses dates written as "01 de Agosto 2026" or "01 de Agosto, 2026".
+  // Returns a Date, or null if the format doesn't match (sorted as oldest).
+  function parsePtDate(str) {
+    if (!str) return null;
+    const m = str.trim().toLowerCase().match(/(\d{1,2})\s+de\s+([a-zçãé]+)\.?,?\s+(\d{4})/i);
+    if (!m) return null;
+    const day = parseInt(m[1], 10);
+    const month = PT_MONTHS[m[2]];
+    const year = parseInt(m[3], 10);
+    if (month === undefined || isNaN(day) || isNaN(year)) return null;
+    return new Date(year, month, day);
+  }
+
+  Papa.parse(BLOG_TSV_URL, {
+    download: true,
+    header: true,
+    complete: (results) => {
+      const posts = results.data.filter(p => p.id && p.id.trim());
+
+      // Most recent first — posts with an unparsable date sort to the end,
+      // ties broken by original sheet order.
+      posts.forEach((p, idx) => { p.__date = parsePtDate(p.date); p.__idx = idx; });
+      posts.sort((a, b) => {
+        if (a.__date && b.__date) return b.__date - a.__date;
+        if (a.__date && !b.__date) return -1;
+        if (!a.__date && b.__date) return 1;
+        return a.__idx - b.__idx;
+      });
+
+      renderRelated(posts.slice(0, 3));
+    },
+    error: (err) => {
+      console.error('[related] erro ao carregar artigos:', err);
+      document.getElementById('relatedGrid').innerHTML = '';
+      document.querySelector('.related-section').style.display = 'none';
+    }
+  });
+
+  function renderRelated(posts) {
+    const grid = document.getElementById('relatedGrid');
+    if (!posts.length) {
+      document.querySelector('.related-section').style.display = 'none';
+      return;
+    }
+    grid.innerHTML = posts.map(post => {
+      const cover = toDirectImageUrl(post.cover_url);
+      const gradient = CATEGORY_GRADIENTS[post.category] || DEFAULT_GRADIENT;
+      const inner = cover ? `<img src="${cover}" alt="${post.title || ''}">` : RELATED_ICON;
+      return `
+        <a href="blog.html?post=${encodeURIComponent(post.id.trim())}" class="related-card">
+          <div class="related-img" style="background:${gradient};">${inner}</div>
+          <div class="related-body">
+            <span class="related-tag">${post.catName || ''}</span>
+            <h3>${post.title || ''}</h3>
+            <p>${post.excerpt || ''}</p>
+          </div>
+        </a>`;
+    }).join('');
+  }
+
+  // ===================== CAROUSEL LOGIC =====================
+  let currentIndex = 0;
+  const modal = document.getElementById('carouselModal');
+  const carouselMedia = document.getElementById('carouselMedia');
+  const carouselCaption = document.getElementById('carouselCaption');
+
+  function openCarousel(index) {
+    currentIndex = index;
+    updateCarousel();
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeCarousel() {
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+
+  function updateCarousel() {
+    const photos = window.__petPhotos || [];
+    const url = photos[currentIndex];
+    if (url) {
+      carouselMedia.innerHTML = `<img src="${url}" class="carousel-img" alt="Foto ${currentIndex + 1}">`;
+    } else {
+      carouselMedia.innerHTML = `
+        <div style="width:100%;height:100%;max-width:800px;max-height:550px;border-radius:18px;background:var(--paper-alt);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;color:var(--ink);box-shadow:0 20px 50px rgba(0,0,0,0.5);">
+          ${placeholderIconSVG(90)}
+          <div style="font-family:var(--display);font-size:26px;font-weight:800;margin-top:14px;">Foto em breve</div>
+          <div style="font-size:15px;color:var(--ink-soft);margin-top:6px;">${window.__petName || ''}</div>
+        </div>`;
+    }
+    carouselCaption.innerText = `Foto ${currentIndex + 1} de ${photos.length}`;
+  }
+
+  document.getElementById('carouselClose').addEventListener('click', closeCarousel);
+  document.getElementById('carouselPrev').addEventListener('click', () => {
+    const photos = window.__petPhotos || [];
+    currentIndex = (currentIndex - 1 + photos.length) % photos.length;
+    updateCarousel();
+  });
+  document.getElementById('carouselNext').addEventListener('click', () => {
+    const photos = window.__petPhotos || [];
+    currentIndex = (currentIndex + 1) % photos.length;
+    updateCarousel();
+  });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeCarousel();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (!modal.classList.contains('active')) return;
+    const photos = window.__petPhotos || [];
+    if (e.key === 'Escape') closeCarousel();
+    if (e.key === 'ArrowLeft') {
+      currentIndex = (currentIndex - 1 + photos.length) % photos.length;
+      updateCarousel();
+    }
+    if (e.key === 'ArrowRight') {
+      currentIndex = (currentIndex + 1) % photos.length;
+      updateCarousel();
+    }
+  });
+</script>
+
+</body>
+</html>
