@@ -615,6 +615,30 @@
     return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
+  // Only lets through a plain positive number (rejects anything that isn't a
+  // finite, reasonable zoom multiplier), since this also gets written into a
+  // style="" attribute. Returns null when unset, meaning "use today's default
+  // crop" — the zoomed rendering path is opt-in per photo.
+  function sanitizeZoom(value) {
+    if (!value) return null;
+    const n = parseFloat(value);
+    if (!isFinite(n) || n <= 0 || n > 10) return null;
+    return n;
+  }
+
+  // How a photo is displayed: by default (no zoom set) it's object-fit:cover,
+  // cropped to fill the box, panned to its focus point — today's behavior,
+  // unchanged. Setting a *_zoom column switches that photo to object-fit:contain
+  // (the whole photo visible, nothing cropped) and then scales it up from there
+  // via transform, anchored at its own focus point — so 1 shows the entire
+  // photo (maximum zoom out) and values above 1 zoom in gradually from there.
+  function photoStyle(photo) {
+    if (photo.zoom == null) {
+      return `object-position:${photo.focus};`;
+    }
+    return `object-fit:contain;object-position:${photo.focus};transform:scale(${photo.zoom});transform-origin:${photo.focus};`;
+  }
+
   // Collects every photo defined for a pet: numbered "photoN_url" columns (any N —
   // not capped at 4, so adding "photo5_url", "photo6_url"... in the sheet is enough
   // to add more photos), plus an optional "extra_photos_url" column for bulk-adding
@@ -622,8 +646,11 @@
   // new spreadsheet column per photo. Each photo can have a matching focus column
   // ("photo1_focus", or "extra_photos_focus" aligned by position) — a CSS
   // object-position value like "top", "center", "30% 70%" — to choose which part of
-  // the photo stays visible when it's cropped in the spotlight box. Defaults to
-  // "center" (today's behavior) when not set.
+  // the photo stays visible when it's cropped. Each photo can also have a matching
+  // zoom column ("photo1_zoom" / "extra_photos_zoom") — a plain number where 1
+  // shows the whole photo uncropped and higher values zoom in from there — to show
+  // more of a photo that's currently cropped too tight. Both default to today's
+  // behavior (center-crop, no zoom) when not set.
   function collectPhotos(pet) {
     const photos = [];
 
@@ -637,16 +664,25 @@
       .forEach(({ n, key }) => {
         const url = toDirectImageUrl(pet[key]);
         if (!url) return;
-        photos.push({ url, focus: sanitizeFocus(pet[`photo${n}_focus`]) });
+        photos.push({
+          url,
+          focus: sanitizeFocus(pet[`photo${n}_focus`]),
+          zoom: sanitizeZoom(pet[`photo${n}_zoom`]),
+        });
       });
 
     const splitList = (val) => (val || '').split(/[\n,;|]+/).map(s => s.trim()).filter(Boolean);
     const extraUrls = splitList(pet.extra_photos_url);
     const extraFocus = splitList(pet.extra_photos_focus);
+    const extraZoom = splitList(pet.extra_photos_zoom);
     extraUrls.forEach((raw, idx) => {
       const url = toDirectImageUrl(raw);
       if (!url) return;
-      photos.push({ url, focus: sanitizeFocus(extraFocus[idx]) });
+      photos.push({
+        url,
+        focus: sanitizeFocus(extraFocus[idx]),
+        zoom: sanitizeZoom(extraZoom[idx]),
+      });
     });
 
     return photos;
@@ -673,7 +709,7 @@
     const first = photos[0];
     if (first) {
       spotlightContainer.innerHTML = `
-        <img src="${first.url}" alt="${petNameAttr}" class="spotlight-img" style="object-position:${first.focus};">
+        <img src="${first.url}" alt="${petNameAttr}" class="spotlight-img" style="${photoStyle(first)}">
         <div class="spotlight-overlay">${zoomIconSVG()}</div>`;
       spotlightBox.classList.add('has-photo');
       spotlightBox.onclick = () => openCarousel(0);
@@ -703,7 +739,7 @@
       const realIdx = idx + 1;
       return `
       <div class="thumb-card" onclick="openCarousel(${realIdx})">
-        <img src="${photo.url}" alt="${petNameAttr} ${realIdx + 1}" loading="lazy" style="object-position:${photo.focus};">
+        <img src="${photo.url}" alt="${petNameAttr} ${realIdx + 1}" loading="lazy" style="${photoStyle(photo)}">
         <div class="thumb-overlay">${zoomIconSVG()}</div>
       </div>`;
     }).join('');
