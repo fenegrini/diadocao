@@ -141,6 +141,23 @@
     height:100%;
     object-fit:cover;
   }
+  .spotlight-box.has-photo{
+    cursor:pointer;
+  }
+  .spotlight-overlay{
+    position:absolute;
+    inset:0;
+    background:rgba(17,37,68,.3);
+    opacity:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    transition:opacity .2s;
+  }
+  .spotlight-box.has-photo:hover .spotlight-overlay{
+    opacity:1;
+  }
   .spotlight-badge{
     position:absolute;
     top:18px;
@@ -207,11 +224,6 @@
     display:grid;
     grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
     gap:20px;
-  }
-  .gallery-empty{
-    color:var(--ink-soft);
-    padding:40px 0;
-    text-align:center;
   }
 
   /* RELATED CONTENT SECTION */
@@ -465,7 +477,7 @@
 
     <div class="pet-main-grid">
       <!-- SPOTLIGHT PHOTO -->
-      <div class="spotlight-box">
+      <div class="spotlight-box" id="spotlightBox">
         <span class="spotlight-badge">Foto Destaque</span>
         <div id="spotlightContainer" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
           <svg viewBox="0 0 24 24" fill="none" stroke="#112544" stroke-width="1.2" width="80" height="80" opacity=".4"><rect x="4" y="7" width="16" height="12" rx="2.5"/><rect x="9" y="4.3" width="6" height="3" rx="1"/><circle cx="12" cy="13" r="3.4"/></svg>
@@ -561,6 +573,16 @@
     return url;
   }
 
+  // A sheet header with a stray leading/trailing space (e.g. "photo1_focus ",
+  // easy to type by accident) produces a differently-named column that every
+  // exact-key lookup below would silently miss. Trim keys once, right after
+  // parsing, so a typo'd header space can't quietly disable a column.
+  function normalizeKeys(obj) {
+    const out = {};
+    for (const k in obj) out[k.trim()] = obj[k];
+    return out;
+  }
+
   const urlParams = new URLSearchParams(window.location.search);
   const petId = (urlParams.get('id') || '').trim();
 
@@ -644,11 +666,17 @@
 
     const petNameAttr = escapeAttr(pet.name || '');
 
-    // Spotlight = first photo, cropped starting from its focus point
+    // Spotlight = first photo, cropped starting from its focus point. Clicking it
+    // opens the same full-screen carousel as the thumbnails, at photo 1.
+    const spotlightBox = document.getElementById('spotlightBox');
     const spotlightContainer = document.getElementById('spotlightContainer');
     const first = photos[0];
     if (first) {
-      spotlightContainer.innerHTML = `<img src="${first.url}" alt="${petNameAttr}" class="spotlight-img" style="object-position:${first.focus};">`;
+      spotlightContainer.innerHTML = `
+        <img src="${first.url}" alt="${petNameAttr}" class="spotlight-img" style="object-position:${first.focus};">
+        <div class="spotlight-overlay">${zoomIconSVG()}</div>`;
+      spotlightBox.classList.add('has-photo');
+      spotlightBox.onclick = () => openCarousel(0);
     } else {
       spotlightContainer.innerHTML = `
         <div style="text-align:center;padding:30px;color:var(--ink);">
@@ -656,21 +684,29 @@
           <div style="font-family:var(--display);font-size:22px;font-weight:700;margin-top:8px;">Foto em breve</div>
           <div style="font-size:14px;color:var(--ink-soft);margin-top:4px;">${pet.name || ''}</div>
         </div>`;
+      spotlightBox.classList.remove('has-photo');
+      spotlightBox.onclick = null;
     }
 
-    // Thumbnails — one card per photo, any count, wraps to as many rows as needed.
-    // Each crop starts from that photo's own focus point (its own *_focus column),
-    // not just the spotlight's.
+    // Thumbnails — every photo AFTER the spotlight one, so the same shot isn't
+    // shown twice. Indices into onclick(...) stay offset by 1 so they still map
+    // to the right photo in the full carousel (spotlight is photo 0 there).
     const thumbsGrid = document.getElementById('thumbsGrid');
-    if (!photos.length) {
-      thumbsGrid.innerHTML = '<p class="gallery-empty">Fotos dessa sessão em breve.</p>';
+    const gallerySection = document.querySelector('.gallery-section');
+    const galleryPhotos = photos.slice(1);
+    if (!galleryPhotos.length) {
+      gallerySection.style.display = 'none';
       return;
     }
-    thumbsGrid.innerHTML = photos.map((photo, idx) => `
-      <div class="thumb-card" onclick="openCarousel(${idx})">
-        <img src="${photo.url}" alt="${petNameAttr} ${idx + 1}" loading="lazy" style="object-position:${photo.focus};">
+    gallerySection.style.display = '';
+    thumbsGrid.innerHTML = galleryPhotos.map((photo, idx) => {
+      const realIdx = idx + 1;
+      return `
+      <div class="thumb-card" onclick="openCarousel(${realIdx})">
+        <img src="${photo.url}" alt="${petNameAttr} ${realIdx + 1}" loading="lazy" style="object-position:${photo.focus};">
         <div class="thumb-overlay">${zoomIconSVG()}</div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
   }
 
   // ===================== FETCH =====================
@@ -678,7 +714,7 @@
     download: true,
     header: true,
     complete: (results) => {
-      const rows = results.data.filter(r => r.id && r.id.trim());
+      const rows = results.data.filter(r => r.id && r.id.trim()).map(normalizeKeys);
       const pet = rows.find(r => r.id.trim().toLowerCase() === petId.toLowerCase());
       if (!pet) {
         console.warn('[pet] id não encontrado na planilha:', petId, rows);
@@ -727,7 +763,7 @@
     download: true,
     header: true,
     complete: (results) => {
-      const posts = results.data.filter(p => p.id && p.id.trim());
+      const posts = results.data.filter(p => p.id && p.id.trim()).map(normalizeKeys);
 
       // Most recent first — posts with an unparsable date sort to the end,
       // ties broken by original sheet order.

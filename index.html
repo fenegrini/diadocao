@@ -899,6 +899,16 @@
 
   const PLACEHOLDER_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="#112544" stroke-width="1.5" opacity=".6"><rect x="4" y="7" width="16" height="12" rx="2.5"/><rect x="9" y="4.3" width="6" height="3" rx="1"/><circle cx="12" cy="13" r="3.4"/></svg>`;
 
+  // A sheet header with a stray leading/trailing space (e.g. "photo1_focus ",
+  // easy to type by accident) produces a differently-named column that every
+  // exact-key lookup below would silently miss. Trim keys once, right after
+  // parsing, so a typo'd header space can't quietly disable a column.
+  function normalizeKeys(obj) {
+    const out = {};
+    for (const k in obj) out[k.trim()] = obj[k];
+    return out;
+  }
+
   // Only lets through safe CSS object-position values (keywords/percentages/px),
   // since this gets written straight into a style="" attribute.
   function sanitizeFocus(value) {
@@ -982,7 +992,7 @@
     download: true,
     header: true,
     complete: (results) => {
-      const rows = results.data.filter(r => r.id && r.id.trim());
+      const rows = results.data.filter(r => r.id && r.id.trim()).map(normalizeKeys);
       console.log('[portfolio] pets carregados da planilha:', rows);
       renderPortfolio(rows);
     },
