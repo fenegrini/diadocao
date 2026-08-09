@@ -637,12 +637,14 @@
     return n;
   }
 
-  // How a photo is displayed: by default (no zoom set) it's object-fit:cover,
-  // cropped to fill the box, panned to its focus point — today's behavior,
-  // unchanged. Setting a *_zoom column switches that photo to object-fit:contain
-  // (the whole photo visible, nothing cropped) and then scales it up from there
-  // via transform, anchored at its own focus point — so 1 shows the entire
-  // photo (maximum zoom out) and values above 1 zoom in gradually from there.
+  // How the spotlight photo is displayed: by default (no zoom set) it's
+  // object-fit:cover, cropped to fill the box, panned to its focus point —
+  // today's behavior, unchanged. Setting a *_zoom column switches it to
+  // object-fit:contain (the whole photo visible, nothing cropped) and then
+  // scales it up from there via transform, anchored at its own focus point —
+  // so 1 shows the entire photo (maximum zoom out) and values above 1 zoom in
+  // gradually from there. Spotlight-only by design — thumbnails always use
+  // plain object-position (see below), so zoom doesn't quietly resize the grid.
   function photoStyle(photo) {
     if (photo.zoom == null) {
       return `object-position:${photo.focus};`;
@@ -657,11 +659,12 @@
   // new spreadsheet column per photo. Each photo can have a matching focus column
   // ("photo1_focus", or "extra_photos_focus" aligned by position) — a CSS
   // object-position value like "top", "center", "30% 70%" — to choose which part of
-  // the photo stays visible when it's cropped. Each photo can also have a matching
+  // the photo stays visible when it's cropped. Each photo also carries a matching
   // zoom column ("photo1_zoom" / "extra_photos_zoom") — a plain number where 1
-  // shows the whole photo uncropped and higher values zoom in from there — to show
-  // more of a photo that's currently cropped too tight. Both default to today's
-  // behavior (center-crop, no zoom) when not set.
+  // shows the whole photo uncropped and higher values zoom in from there — but
+  // only the spotlight (photos[0]) actually renders it; thumbnails ignore zoom
+  // by design. Both default to today's behavior (center-crop, no zoom) when
+  // not set.
   function collectPhotos(pet) {
     const photos = [];
 
@@ -753,7 +756,7 @@
       const realIdx = idx + 1;
       return `
       <div class="thumb-card" onclick="openCarousel(${realIdx})">
-        <img src="${photo.url}" alt="${petNameAttr} ${realIdx + 1}" loading="lazy" style="${photoStyle(photo)}">
+        <img src="${photo.url}" alt="${petNameAttr} ${realIdx + 1}" loading="lazy" style="object-position:${photo.focus};">
         <div class="thumb-overlay">${zoomIconSVG()}</div>
       </div>`;
     }).join('');

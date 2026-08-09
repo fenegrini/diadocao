@@ -923,26 +923,15 @@
     return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
-  // Only lets through a plain positive number, since this also gets written into
-  // a style="" attribute. Returns null when unset, meaning "use today's default
-  // crop" — the zoomed rendering path is opt-in per photo.
-  function sanitizeZoom(value) {
-    if (!value) return null;
-    const n = parseFloat(value);
-    if (!isFinite(n) || n <= 0 || n > 10) return null;
-    return n;
-  }
-
-  // By default (no *_zoom column set) the cover photo is object-fit:cover,
-  // cropped to fill the card, panned to its focus point — unchanged from before.
-  // Setting photo1_zoom switches it to object-fit:contain (whole photo visible)
-  // scaled up from there via transform, anchored at the focus point — 1 shows
-  // the entire photo, higher values zoom in gradually from there.
-  function coverPhotoStyle(focus, zoom) {
-    if (zoom == null) {
-      return `width:100%;height:100%;object-fit:cover;object-position:${focus};`;
-    }
-    return `width:100%;height:100%;object-fit:contain;object-position:${focus};transform:scale(${zoom});transform-origin:${focus};`;
+  // The cover photo is always object-fit:cover, cropped to fill the card and
+  // panned to its focus point — no zoom control here (that's spotlight-only, on
+  // the pet page). Deliberately a separate column from pet.html's photo1_focus:
+  // the homepage card and the pet page's spotlight both show photo1_url, but
+  // framing needs differ per placement, so cover_focus lets you pan the
+  // homepage card without touching how that same photo looks on its own pet
+  // page, and vice versa.
+  function coverPhotoStyle(focus) {
+    return `width:100%;height:100%;object-fit:cover;object-position:${focus};`;
   }
 
   function renderPortfolio(rows) {
@@ -955,13 +944,12 @@
     grid.innerHTML = rows.map(pet => {
       const id = pet.id.trim();
       const photoUrl = toDirectImageUrl(pet.photo1_url);
-      const focus = sanitizeFocus(pet.photo1_focus);
-      const zoom = sanitizeZoom(pet.photo1_zoom);
+      const focus = sanitizeFocus(pet.cover_focus);
       const name = (pet.name || '').trim();
       const nameAttr = escapeAttr(name);
       const subtitle = (pet.subtitle || '').trim();
       const inner = photoUrl
-        ? `<img src="${photoUrl}" alt="${nameAttr}" loading="lazy" style="${coverPhotoStyle(focus, zoom)}">`
+        ? `<img src="${photoUrl}" alt="${nameAttr}" loading="lazy" style="${coverPhotoStyle(focus)}">`
         : PLACEHOLDER_ICON;
       return `
         <a href="pet.html?id=${encodeURIComponent(id)}" class="p-tile" style="text-decoration:none;display:block;">
