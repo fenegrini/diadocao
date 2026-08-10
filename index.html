@@ -986,15 +986,28 @@
     }
     portfolioPrev.style.display = 'flex';
     portfolioNext.style.display = 'flex';
-    portfolioPrev.disabled = scrollable ? portfolioGrid.scrollLeft <= 4 : true;
-    portfolioNext.disabled = scrollable ? portfolioGrid.scrollLeft >= (portfolioGrid.scrollWidth - portfolioGrid.clientWidth - 4) : true;
+    // Looping carousel — prev/next never disable at the ends, they wrap around
+    // instead (see click handlers below). Only disabled when there's nothing to
+    // scroll at all.
+    portfolioPrev.disabled = !scrollable;
+    portfolioNext.disabled = !scrollable;
   }
 
   portfolioPrev.addEventListener('click', () => {
-    portfolioGrid.scrollBy({ left: -cardScrollStep(), behavior: 'smooth' });
+    const atStart = portfolioGrid.scrollLeft <= 4;
+    if (atStart) {
+      portfolioGrid.scrollTo({ left: portfolioGrid.scrollWidth - portfolioGrid.clientWidth, behavior: 'smooth' });
+    } else {
+      portfolioGrid.scrollBy({ left: -cardScrollStep(), behavior: 'smooth' });
+    }
   });
   portfolioNext.addEventListener('click', () => {
-    portfolioGrid.scrollBy({ left: cardScrollStep(), behavior: 'smooth' });
+    const atEnd = portfolioGrid.scrollLeft >= (portfolioGrid.scrollWidth - portfolioGrid.clientWidth - 4);
+    if (atEnd) {
+      portfolioGrid.scrollTo({ left: 0, behavior: 'smooth' });
+    } else {
+      portfolioGrid.scrollBy({ left: cardScrollStep(), behavior: 'smooth' });
+    }
   });
   portfolioGrid.addEventListener('scroll', updatePortfolioNav);
   window.addEventListener('resize', updatePortfolioNav);
