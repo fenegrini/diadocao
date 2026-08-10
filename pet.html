@@ -78,6 +78,8 @@
   .nav-links a:hover{opacity:.8;}
   .nav-cta .btn-ghost{background:transparent;border-color:#ffffff;color:#ffffff;}
   .nav-cta .btn-ghost:hover{background:#ffffff;color:#ff5b59;}
+  .nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:6px;}
+  .nav-toggle span{display:block;width:24px;height:2px;background:#ffffff;margin:5px 0;border-radius:2px;}
 
   /* ---------- PET PAGE ---------- */
   .pet-page{padding:50px 0 90px;}
@@ -432,6 +434,10 @@
   .foot-links a:hover{color:var(--coral-dark);}
   .foot-meta{font-size:13px;color:var(--ink-soft);}
 
+  @media (max-width:920px){
+    .nav-links,.nav-cta .btn-ghost{display:none;}
+    .nav-toggle{display:block;}
+  }
   @media (max-width:880px){
     .pet-main-grid{grid-template-columns:1fr;}
     .carousel-prev{left:10px;}
@@ -460,9 +466,25 @@
     </nav>
     <div class="nav-cta">
       <a href="index.html#contato" class="btn btn-ghost">Agendar sessão</a>
+      <button class="nav-toggle" aria-label="Abrir menu" id="navToggle">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </div>
 </header>
+
+<!-- mobile menu -->
+<div id="mobileMenu" style="display:none;background:#ff5b59;border-bottom:1px solid rgba(255,255,255,.2);">
+  <ul style="list-style:none;padding:20px 28px;margin:0;display:flex;flex-direction:column;gap:18px;font-weight:600;">
+    <li><a href="index.html#portfolio" style="color:#ffffff;text-decoration:none;">Portfólio</a></li>
+    <li><a href="index.html#como-funciona" style="color:#ffffff;text-decoration:none;">Como funciona</a></li>
+    <li><a href="index.html#depoimentos" style="color:#ffffff;text-decoration:none;">Depoimentos</a></li>
+    <li><a href="index.html#sobre" style="color:#ffffff;text-decoration:none;">Sobre</a></li>
+    <li><a href="index.html#agenda" style="color:#ffffff;text-decoration:none;">Agenda</a></li>
+    <li><a href="blog.html" style="color:#ffffff;text-decoration:none;">Blog</a></li>
+    <li><a href="index.html#contato" style="color:#ffffff;text-decoration:none;">Contato</a></li>
+  </ul>
+</div>
 
 <main class="pet-page">
   <div class="wrap">
@@ -541,6 +563,18 @@
     <div class="foot-meta">© 2026 Um Dia do Cão · São Paulo, Brasil</div>
   </div>
 </footer>
+
+<script>
+  // Mobile Nav Toggle
+  const toggle = document.getElementById('navToggle');
+  const menu = document.getElementById('mobileMenu');
+  toggle.addEventListener('click', () => {
+    const open = menu.style.display === 'block';
+    menu.style.display = open ? 'none' : 'block';
+    toggle.setAttribute('aria-expanded', String(!open));
+  });
+  menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => menu.style.display = 'none'));
+</script>
 
 <!-- CAROUSEL LIGHTBOX MODAL -->
 <div class="carousel-modal" id="carouselModal" aria-hidden="true">

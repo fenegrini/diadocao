@@ -131,6 +131,8 @@
   }
   @media (max-width:920px){
     .blog-grid{grid-template-columns:repeat(2, 1fr);}
+    .nav-links,.nav-cta .btn-ghost{display:none;}
+    .nav-toggle{display:block;}
   }
   @media (max-width:600px){
     .blog-grid{grid-template-columns:1fr;}
@@ -620,7 +622,9 @@
   toggle.addEventListener('click', () => {
     const open = menu.style.display === 'block';
     menu.style.display = open ? 'none' : 'block';
+    toggle.setAttribute('aria-expanded', String(!open));
   });
+  menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => menu.style.display = 'none'));
 </script>
 
 </body>
