@@ -345,6 +345,9 @@
   .field input:focus,.field textarea:focus{outline:none;border-color:var(--coral);}
   .field textarea{resize:vertical;min-height:100px;}
   .form-note{font-size:13px;color:var(--ink-soft);opacity:.8;}
+  .consent-field{display:flex;align-items:flex-start;gap:10px;}
+  .consent-field input{width:18px;height:18px;flex-shrink:0;margin-top:3px;accent-color:var(--coral);cursor:pointer;}
+  .consent-field label{font-size:13px;color:var(--ink-soft);line-height:1.5;font-weight:500;cursor:pointer;}
 
   .form-success{
     background:#ffffff;
@@ -746,6 +749,10 @@
         <div class="field">
           <label for="mensagem">Conte um pouco sobre a sessão que você imagina</label>
           <textarea id="mensagem" name="mensagem" required></textarea>
+        </div>
+        <div class="consent-field">
+          <input id="consentimento" name="consentimento_lgpd" type="checkbox" value="sim" required>
+          <label for="consentimento">Autorizo o uso dos meus dados pessoais fornecidos neste formulário exclusivamente para fins de contato sobre a sessão fotográfica, em conformidade com a Lei Geral de Proteção de Dados (LGPD – Lei nº 13.709/2018).</label>
         </div>
         <button type="submit" class="btn btn-primary" id="contatoSubmitBtn" style="align-self:flex-start;">Enviar mensagem</button>
         <p id="contatoError" class="form-note" style="display:none;color:#c0392b;">Não foi possível enviar. Tente novamente ou chame no WhatsApp.</p>
