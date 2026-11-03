@@ -512,6 +512,54 @@
       }
     }
   }
+
+  /* ---------- COOKIE CONSENT BANNER ---------- */
+  .cookie-consent{
+    position:fixed;
+    left:0;right:0;bottom:0;
+    z-index:3000;
+    background:var(--ink);
+    color:var(--paper);
+    padding:20px 28px;
+    box-shadow:0 -10px 30px -10px rgba(0,0,0,.35);
+  }
+  .cookie-consent-inner{
+    max-width:var(--maxw);
+    margin:0 auto;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+  }
+  .cookie-consent-inner p{
+    margin:0;
+    font-size:14px;
+    line-height:1.5;
+    color:#e4eaf2;
+    flex:1 1 420px;
+  }
+  .cookie-consent-actions{
+    display:flex;
+    gap:12px;
+    flex-shrink:0;
+  }
+  .cookie-consent-actions .btn{
+    padding:10px 20px;
+    font-size:14px;
+  }
+  .cookie-consent-actions .btn-ghost{
+    border-color:#ffffff;
+    color:#ffffff;
+  }
+  .cookie-consent-actions .btn-ghost:hover{
+    background:#ffffff;
+    color:var(--ink);
+  }
+  @media (max-width:600px){
+    .cookie-consent-inner{flex-direction:column;align-items:stretch;text-align:center;}
+    .cookie-consent-actions{justify-content:center;}
+  }
 </style>
 </head>
 <body>
@@ -1063,6 +1111,59 @@
         contatoBtn.innerText = 'Enviar mensagem';
       });
   });
+</script>
+
+<!-- ===================== COOKIE CONSENT BANNER ===================== -->
+<div class="cookie-consent" id="cookieConsent" style="display:none;">
+  <div class="cookie-consent-inner">
+    <p>Usamos cookies para analisar o tráfego do site e melhorar sua experiência, em conformidade com a LGPD. Os cookies de análise (Google Analytics) só são ativados se você aceitar.</p>
+    <div class="cookie-consent-actions">
+      <button class="btn btn-ghost" id="cookieDecline">Recusar</button>
+      <button class="btn btn-primary" id="cookieAccept">Aceitar</button>
+    </div>
+  </div>
+</div>
+<script>
+  (function () {
+    var CONSENT_KEY = 'cookieConsent';
+    var banner = document.getElementById('cookieConsent');
+    var acceptBtn = document.getElementById('cookieAccept');
+    var declineBtn = document.getElementById('cookieDecline');
+
+    // Only ever called after explicit "Aceitar" — never on page load by
+    // default, and never at all if the visitor declines or hasn't decided yet.
+    // GA4 gets wired in here once a Measurement ID (G-XXXXXXXXXX) is set.
+    function loadAnalytics() {
+      // Example once a Measurement ID is available:
+      // var s = document.createElement('script');
+      // s.async = true;
+      // s.src = 'https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX';
+      // document.head.appendChild(s);
+      // window.dataLayer = window.dataLayer || [];
+      // function gtag(){ dataLayer.push(arguments); }
+      // gtag('js', new Date());
+      // gtag('config', 'G-XXXXXXXXXX');
+    }
+
+    var stored = null;
+    try { stored = localStorage.getItem(CONSENT_KEY); } catch (e) {}
+
+    if (stored === 'granted') {
+      loadAnalytics();
+    } else if (stored !== 'denied') {
+      banner.style.display = 'block';
+    }
+
+    acceptBtn.addEventListener('click', function () {
+      try { localStorage.setItem(CONSENT_KEY, 'granted'); } catch (e) {}
+      banner.style.display = 'none';
+      loadAnalytics();
+    });
+    declineBtn.addEventListener('click', function () {
+      try { localStorage.setItem(CONSENT_KEY, 'denied'); } catch (e) {}
+      banner.style.display = 'none';
+    });
+  })();
 </script>
 
 </body>
