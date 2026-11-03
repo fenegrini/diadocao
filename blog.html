@@ -694,17 +694,16 @@
 
     // Only ever called after explicit "Aceitar" — never on page load by
     // default, and never at all if the visitor declines or hasn't decided yet.
-    // GA4 gets wired in here once a Measurement ID (G-XXXXXXXXXX) is set.
     function loadAnalytics() {
-      // Example once a Measurement ID is available:
-      // var s = document.createElement('script');
-      // s.async = true;
-      // s.src = 'https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX';
-      // document.head.appendChild(s);
-      // window.dataLayer = window.dataLayer || [];
-      // function gtag(){ dataLayer.push(arguments); }
-      // gtag('js', new Date());
-      // gtag('config', 'G-XXXXXXXXXX');
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-92L8BPPC76';
+      document.head.appendChild(s);
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ dataLayer.push(arguments); }
+      window.gtag = gtag;
+      gtag('js', new Date());
+      gtag('config', 'G-92L8BPPC76');
     }
 
     var stored = null;
